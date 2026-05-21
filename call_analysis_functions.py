@@ -45,16 +45,15 @@ def createDict(arr1, arr2):
     Returns:
     dict: A dictionary with keys from arr1 and values from arr2.
     """
-    dict = {}
+    result = {}
     for i in range(len(arr1)):
-        dict[arr1[i]] = arr2[i]
-    return dict
+        result[arr1[i]] = arr2[i]
+    return result
 
 
 def xml_to_csv(xml_file_path: str, csv_file_path: str) -> None:
     """
-    This function converts an XML file containing call data to a CSV file with only following headers:
-    Phone_no, Duration, Date_spec, Type, Date&Time, Contact_Name.
+    This function converts an XML file containing call data to a CSV file.
 
     Args:
     xml_file_path (str): The path of the XML file to be converted.
@@ -66,24 +65,25 @@ def xml_to_csv(xml_file_path: str, csv_file_path: str) -> None:
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
 
-    csv_file = open(csv_file_path, 'w', newline='', encoding='utf-8')
-    csv_writer = csv.writer(csv_file)
+    with open(csv_file_path, 'w', newline='', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(
+            ["Phone_no", "Duration", "Date_spec",
+             "Type", "Date&Time", "Contact_Name"]
+        )
 
-    csv_writer.writerow(["Phone_no", "Duration", "Date_spec",
-                        "Type", "Date&Time", "Contact_Name"])
+        for call in root.findall('.//call'):
+            phone_no = call.get('number', '')
+            duration = call.get('duration', '')
+            date_spec = call.get('date', '')
+            call_type = call.get('type', '')
+            readable_date = call.get('readable_date', '')
+            contact_name = call.get('contact_name', '')
 
-    for call in root.findall('.//call'):
-        phone_no = call.get('number', '')
-        duration = call.get('duration', '')
-        date_spec = call.get('date', '')
-        call_type = call.get('type', '')
-        readable_date = call.get('readable_date', '')
-        contact_name = call.get('contact_name', '')
-
-        csv_writer.writerow([phone_no, duration, date_spec,
-                            call_type, readable_date, contact_name])
-
-    csv_file.close()
+            csv_writer.writerow(
+                [phone_no, duration, date_spec,
+                 call_type, readable_date, contact_name]
+            )
 
 
 def transform_name(name):
